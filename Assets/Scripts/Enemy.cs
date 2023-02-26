@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    private AudioManager audioManager;
     private float speed = 2.0f;
     private float turnRange = 0.005f;
     private float animationLength = 0.2f;
@@ -48,6 +49,11 @@ public class Enemy : MonoBehaviour
 
     private void Start()
     {
+        GameObject audioManagerObj;
+
+        audioManagerObj = GameObject.Find("AudioManager");
+        audioManager = audioManagerObj.GetComponent<AudioManager>();
+
         spriteRend = GetComponent<SpriteRenderer>();
 
         StartCoroutine(AnimationOne());
@@ -911,8 +917,10 @@ public class Enemy : MonoBehaviour
     private IEnumerator FreezeDecay()
     {
         yield return new WaitForSeconds(10.0f);
+        audioManager.PlayIceCrackOneSound();
         toppingRend.sprite = frozenSpriteSecond;
         yield return new WaitForSeconds(3.2f);
+        audioManager.PlayIceCrackTwoSound();
         toppingRend.sprite = frozenSpriteThird;
     }
 

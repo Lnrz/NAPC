@@ -6,9 +6,15 @@ public class WinScript : MonoBehaviour
 {
     private int coinsNum;
     private int nacmanCoinNum = 0;
+    private AudioManager audioManager;
 
     void Start()
     {
+        GameObject audioManagerObj;
+
+        audioManagerObj = GameObject.Find("AudioManager");
+        audioManager = audioManagerObj.GetComponent<AudioManager>();
+
         coinsNum = GameObject.FindGameObjectsWithTag("Coin").Length;
     }
 
@@ -19,6 +25,7 @@ public class WinScript : MonoBehaviour
         {
             DisableEnemies();
             DisableNacman();
+            audioManager.PlayVictorySound();
             DisplayGameVictory();
         }
     }

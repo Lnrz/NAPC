@@ -10,6 +10,9 @@ public class ButtonScripts : MonoBehaviour
     [SerializeField] private Image[] images;
     [SerializeField] private Sprite[] openMouthSkins;
     [SerializeField] private Slider volumeSlider;
+    [SerializeField] private Image handleImage;
+    [SerializeField] private Sprite[] volHandleImg;
+    private bool hasReachedMaxVol = false;
 
     public void Replay()
     {
@@ -52,6 +55,20 @@ public class ButtonScripts : MonoBehaviour
     public void SetVolume(float val)
     {
         PlayerPrefs.SetFloat("volume", val);
+    }
+
+    public void ChangeVolumeHandle(float val)
+    {
+        if (val == 1)
+        {
+            handleImage.sprite = volHandleImg[1];
+            hasReachedMaxVol = true;
+        }
+        else if (hasReachedMaxVol)
+        {
+            handleImage.sprite = volHandleImg[0];
+            hasReachedMaxVol = false;
+        }
     }
 
     public void SettingMenuStart()

@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
 {
     private GameUI gameUI;
     private ManageEnemies enemyManager;
+    private AudioManager audioManager;
     private WinScript winScript;
     private float speed = 2.25f;
     private float turnRange = 0.28f;
@@ -39,11 +40,15 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         GameObject gameManager;
+        GameObject audioManagerObj;
 
         gameManager = GameObject.Find("Game Manager");
         gameUI = gameManager.GetComponent<GameUI>();
         enemyManager = gameManager.GetComponent<ManageEnemies>();
         winScript = gameManager.GetComponent<WinScript>();
+
+        audioManagerObj = GameObject.Find("AudioManager");
+        audioManager = audioManagerObj.GetComponent<AudioManager>();
 
         playerAnim = gameObject.GetComponent<Animator>();
 
@@ -111,6 +116,7 @@ public class PlayerController : MonoBehaviour
             if (block.CompareTag("Wall") && (tags == null || !tags.IsItTagged("undestroyable")))
             {
                 Destroy(block);
+                audioManager.PlayGhostDeathSound();
                 Graph.AddNode(block.transform.position);
                 destroyUsesLeft--;
             }
@@ -123,6 +129,7 @@ public class PlayerController : MonoBehaviour
         {
             Destroy(collision.gameObject);
             gameUI.AddPoints(5);
+            audioManager.PlayCoinSound();
             winScript.AddCoin();
         }
         else if (!isFreezeEnabled && !hasPowerUp && collision.gameObject.CompareTag("Powerup") && collision.Distance(this.GetComponent<Collider2D>()).distance <= -triggerDistance)
@@ -130,18 +137,21 @@ public class PlayerController : MonoBehaviour
             Destroy(collision.gameObject);
             hasPowerUp = true;
             enemyManager.PlayerHasPowerup();
+            audioManager.IncreaseBGMPitch();
             StartCoroutine(PowerUpDuration());
         }
         else if (collision.gameObject.CompareTag("PowerupD") && collision.Distance(this.GetComponent<Collider2D>()).distance <= -triggerDistance)
         {
             Destroy(collision.gameObject);
             isDestroyEnabled = true;
+            audioManager.PlayFireSound();
             ChangeCursorToDestroy();
         }
         else if (!hasPowerUp && collision.gameObject.CompareTag("PowerupF") && collision.Distance(this.GetComponent<Collider2D>()).distance <= -triggerDistance)
         {
             Destroy(collision.gameObject);
             isFreezeEnabled = true;
+            audioManager.PlayFreezeSound();
             enemyManager.FreezeEnemies();
             StartCoroutine(FreezeCountdown());
         }
@@ -150,6 +160,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator FreezeCountdown()
     {
         yield return new WaitForSeconds(15.0f);
+        audioManager.PlayIceBreakSound();
         enemyManager.DefreezeEnemies();
         isFreezeEnabled = false;
     }
@@ -178,10 +189,13 @@ public class PlayerController : MonoBehaviour
                         playerAnim.enabled = true;
                         playerAnim.SetBool("Death", true);
                         playerAnim.SetInteger("Skin", skin);
+                        audioManager.PlayGameOverSound();
+                        ResetCursor();
                     }
                     else
                     {
                         StartCoroutine(enemyManager.KillEnemy(collision.gameObject));
+                        audioManager.PlayGhostDeathSound();
                         gameUI.AddPoints(15);
                     }
                 }
@@ -428,6 +442,7 @@ public class PlayerController : MonoBehaviour
     {
         yield return new WaitForSeconds(powerupLength);
         enemyManager.PowerupExpired();
+        audioManager.RestoreBGMPitch();
         hasPowerUp = false;
     }
 
@@ -457,6 +472,7 @@ public class PlayerController : MonoBehaviour
     public void Deactivate()
     {
         isActive = false;
+        ResetCursor();
     }
 
     public void Activate()
