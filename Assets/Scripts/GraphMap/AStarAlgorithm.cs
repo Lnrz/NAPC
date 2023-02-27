@@ -20,16 +20,6 @@ public static class AStarAlgorithm
             open.Remove(selected);
             for (int i = 0; i < 4; i++)
             {
-
-
-
-                if (selected == null || selected.GetGraphNode() == null)
-                {
-                    UnityEditor.EditorApplication.isPaused = true;
-                }
-
-
-
                 neighbor = selected.GetGraphNode().GetNeighbor(i);
                 if (neighbor != null)
                 {

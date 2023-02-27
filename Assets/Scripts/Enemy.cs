@@ -419,23 +419,6 @@ public class Enemy : MonoBehaviour
         ghostNode = Graph.GetApproximateNode(gameObject.transform.position);
         playerNode = Graph.GetApproximateNode(player.transform.position);
         route = AStarAlgorithm.AStarAlgo(ghostNode, playerNode);
-
-        if (route == null)
-        {
-            Debug.Log("Ghost");
-            if (ghostNode != null)
-            {
-                Debug.Log(ghostNode.GetPosition());
-            }
-            Debug.Log("Player");
-            if (playerNode != null)
-            {
-                Debug.Log(playerNode.GetPosition());
-            }
-            Debug.Log(Graph.GetDimension());
-            UnityEditor.EditorApplication.isPaused = true;
-        }
-
         StreamlineRoute();
     }
 
@@ -556,43 +539,7 @@ public class Enemy : MonoBehaviour
             gameObject.transform.position.x <= spawnBoxXmin ||
             gameObject.transform.position.y >= spawnBoxYMAX ||
             gameObject.transform.position.y <= spawnBoxYmin;
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (!hasExitedFromSpawn && collision.gameObject.CompareTag("Wall") && HasGhostWallTag(collision.gameObject))
-        {
-            Physics2D.IgnoreCollision(collision.collider, gameObject.GetComponent<Collider2D>(), true);
-            ghostWallColliders.Add(collision.collider);
-        }
-        else if (collision.gameObject.CompareTag("Wall"))
-        {
-            Vector2 diff;
-
-            diff = GetCollisionDiff(collision);
-            LockDirection(diff);
-        }
-    }
-
-    private bool HasGhostWallTag(GameObject wall)
-    {
-        TagScript tags = wall.GetComponent<TagScript>();
-        if (tags == null)
-        {
-            return false;
-        }
-        return tags.IsItTagged("ghostwall");
-    }
-
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            Vector2 diff;
-
-            diff = GetCollisionDiff(collision);
-            UnlockDirection(diff);
-        }
+    
     }
 
     private Vector3 ChooseDirection()
@@ -664,59 +611,6 @@ public class Enemy : MonoBehaviour
             direction = ChooseDirection();
         }
         hasCollided = false;
-    }
-
-    private Vector2 GetCollisionDiff(Collision2D collision)
-    {
-        Vector2 pos = transform.position;
-        Vector2 collPoint = collision.collider.ClosestPoint(pos);
-        Vector2 diff = collPoint - pos;
-
-        return diff;
-    }
-
-    private void LockDirection(Vector2 diff)
-    {
-        Vector3 badDirection;
-
-        if (System.Math.Abs(diff.x) > System.Math.Abs(diff.y))
-        {
-            if (diff.x > 0)
-            {
-                SwitchBlockOn(0);
-                badDirection = Vector3.right;
-                ResetLimits(0);
-                freeOn[0] = false;
-            }
-            else
-            {
-                SwitchBlockOn(1);
-                badDirection = Vector3.left;
-                ResetLimits(1);
-                freeOn[1] = false;
-            }
-        }
-        else
-        {
-            if (diff.y > 0)
-            {
-                SwitchBlockOn(2);
-                badDirection = Vector3.up;
-                ResetLimits(2);
-                freeOn[2] = false;
-            }
-            else
-            {
-                SwitchBlockOn(3);
-                badDirection = Vector3.down;
-                ResetLimits(3);
-                freeOn[3] = false;
-            }
-        }
-        if (direction.Equals(badDirection))
-        {
-            hasCollided = true;
-        }
     }
 
     private void UnlockDirection(Vector2 diff)
@@ -795,6 +689,98 @@ public class Enemy : MonoBehaviour
     {
         limits[index, 0] = 0;
         limits[index, 1] = 0;
+    }
+
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (!hasExitedFromSpawn && collision.gameObject.CompareTag("Wall") && HasGhostWallTag(collision.gameObject))
+        {
+            Physics2D.IgnoreCollision(collision.collider, gameObject.GetComponent<Collider2D>(), true);
+            ghostWallColliders.Add(collision.collider);
+        }
+        else if (collision.gameObject.CompareTag("Wall"))
+        {
+            Vector2 diff;
+
+            diff = GetCollisionDiff(collision);
+            LockDirection(diff);
+        }
+    }
+
+    private bool HasGhostWallTag(GameObject wall)
+    {
+        TagScript tags = wall.GetComponent<TagScript>();
+        if (tags == null)
+        {
+            return false;
+        }
+        return tags.IsItTagged("ghostwall");
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            Vector2 diff;
+
+            diff = GetCollisionDiff(collision);
+            UnlockDirection(diff);
+        }
+    }
+
+
+    private Vector2 GetCollisionDiff(Collision2D collision)
+    {
+        Vector2 pos = transform.position;
+        Vector2 collPoint = collision.collider.ClosestPoint(pos);
+        Vector2 diff = collPoint - pos;
+
+        return diff;
+    }
+
+    private void LockDirection(Vector2 diff)
+    {
+        Vector3 badDirection;
+
+        if (System.Math.Abs(diff.x) > System.Math.Abs(diff.y))
+        {
+            if (diff.x > 0)
+            {
+                SwitchBlockOn(0);
+                badDirection = Vector3.right;
+                ResetLimits(0);
+                freeOn[0] = false;
+            }
+            else
+            {
+                SwitchBlockOn(1);
+                badDirection = Vector3.left;
+                ResetLimits(1);
+                freeOn[1] = false;
+            }
+        }
+        else
+        {
+            if (diff.y > 0)
+            {
+                SwitchBlockOn(2);
+                badDirection = Vector3.up;
+                ResetLimits(2);
+                freeOn[2] = false;
+            }
+            else
+            {
+                SwitchBlockOn(3);
+                badDirection = Vector3.down;
+                ResetLimits(3);
+                freeOn[3] = false;
+            }
+        }
+        if (direction.Equals(badDirection))
+        {
+            hasCollided = true;
+        }
     }
 
     private IEnumerator AnimationOne()

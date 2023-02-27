@@ -73,6 +73,10 @@ public class PlayerController : MonoBehaviour
                     ResetCursor();
                 }
             }
+            if (hasPowerUp)
+            {
+                AnimateColor();
+            }
             UpdateLimits();
             ChangeDirection();
             ChangeRotation();
@@ -444,6 +448,8 @@ public class PlayerController : MonoBehaviour
         enemyManager.PowerupExpired();
         audioManager.RestoreBGMPitch();
         hasPowerUp = false;
+
+        spriteRend.color = new Color(1,1,1,1);
     }
 
     private IEnumerator AnimationOpenMouth()
@@ -497,5 +503,16 @@ public class PlayerController : MonoBehaviour
         hotspot = Vector2.zero;
 
         Cursor.SetCursor(null, hotspot, CursorMode.Auto);
+    }
+
+    private void AnimateColor()
+    {
+        Color newColor;
+
+        newColor = Color.white;
+        Color.RGBToHSV(spriteRend.color,out newColor.r,out newColor.g,out  newColor.b);
+        newColor.r = (newColor.r + 0.5f * Time.deltaTime) % 1;
+        newColor.g = 0.75f;
+        spriteRend.color = Color.HSVToRGB(newColor.r, newColor.g, newColor.b);
     }
 }
